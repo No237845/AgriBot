@@ -13,3 +13,10 @@ pikepdf
 sentence-transformers
 elevenlabs
 pandas
+
+##API 
+fastapi
+uvicorn
+ollama
+requests
+python-dotenv

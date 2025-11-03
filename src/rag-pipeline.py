@@ -36,7 +36,6 @@ import ollama
 # =====================================
 logging.basicConfig(level=logging.INFO)
 
-PDF_PATH = "./data/"                # Dossier des fichiers PDF
 CORPUS_PATH = "./data/corpus.json"  # Fichier JSON contenant les données collectées
 SOURCE_PATH = "./data/source.txt"   # Fichier texte brut contenant des sources
 VECTOR_DB_PATH = "./chrome_langchain_db"
@@ -50,37 +49,28 @@ embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
 
 
 # =====================================
-# 1️-CHARGEMENT DES SOURCES MULTIPLES
+# 1️-CHARGEMENT DES DONNEES
 # =====================================
-def load_pdfs(pdf_folder):
-    """Charge tous les fichiers PDF du dossier spécifié"""
-    pdf_docs = []
-    for file in os.listdir(pdf_folder):
-        if file.endswith(".pdf"):
-            path = os.path.join(pdf_folder, file)
-            loader = PyMuPDFLoader(file_path=path)
-            pdf_docs.extend(loader.load())
-            logging.info(f" PDF chargé : {file}")
-    return pdf_docs
+
 
 
 def load_corpus(corpus_path):
-    """Charge un corpus JSON contenant les données collectées"""
+    """Charge un corpus JSON contenant les données agricoles collectées"""
     if not os.path.exists(corpus_path):
         logging.warning(f"Fichier corpus non trouvé : {corpus_path}")
         return []
 
     try:
         # Lecture du fichier corpus (JSON )
-        if corpus_path.endswith(".json") or corpus_path.endswith(".csv"):
-            df = pd.read_csv(corpus_path)
+        if corpus_path.endswith(".json"):
+            df = pd.read_json(corpus_path)
         else:
             raise ValueError("Format de fichier non supporté. Utilise .json")
 
         documents = []
         for i, row in df.iterrows():
             # On combine URL + Titre + Contenu comme texte principal
-            content = f"{row.get('url', '')}\n{row.get('title', '')}\n{row.get('content', '')}\n{row.get('source', '')}"
+            content = f"{row.get('titre', '')}\n{row.get('contenu', '')}\n{row.get('source', '')}"
             doc = Document(
                 page_content=content,
                 metadata={
@@ -107,7 +97,6 @@ def load_text_source(source_path):
 
     with open(source_path, "r", encoding="utf-8") as f:
         text = f.read()
-
     # On découpe le texte brut en petits morceaux
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     docs = text_splitter.create_documents([text])
@@ -121,7 +110,7 @@ def load_text_source(source_path):
 # =====================================
 # 2️ CRÉATION DE LA BASE VECTORIELLE
 # =====================================
-def build_or_load_vector_db(all_docs):
+def build_or_load_vector_db(all_docs,embeddings):
     """
     Crée ou charge la base vectorielle Chroma avec tous les documents disponibles.
     """
@@ -145,17 +134,21 @@ def build_or_load_vector_db(all_docs):
 
 
 # =====================================
-# 3️ RAG : RETRIEVER + LLM + PROMPTS
+# 3️ RAG : RETRIEVER + LLM 
 # =====================================
 def create_retriever(vector_db, llm):
     """Crée un retriever multi-query pour des recherches contextuelles plus pertinentes"""
     QUERY_PROMPT = PromptTemplate(
         input_variables=["question"],
         template=(
-            "Tu es AgriBot Burkina, un assistant IA agricole spécialisé dans les pratiques locales. "
-            "Génère cinq reformulations de la question suivante afin d'extraire les informations "
-            "les plus pertinentes de la base de connaissances agricoles.\n\n"
-            "Question d'origine : {question}"
+            "Tu es AgriBot Burkina, un assistant IA agricole spécialisé dans les pratiques du Burkina Faso. "
+            "Ton objectif est de reformuler la question suivante en trois variantes différentes, "
+            "TOUTES EN FRANÇAIS, afin de maximiser la recherche d'informations pertinentes dans la base de connaissances agricoles.\n\n"
+            " Question d'origine : {question}\n\n"
+            " Instructions importantes :\n"
+            "- Toutes les reformulations doivent être en français.\n"
+            "- Utilise un ton simple et local adapté aux agriculteurs burkinabè.\n"
+            "- Les phrases doivent garder le même sens global que la question d’origine."
         ),
     )
 
@@ -196,36 +189,3 @@ Réponse claire et concise :
     return chain
 
 
-# =====================================
-# 4️ MAIN PIPELINE
-# =====================================
-def main():
-    # 1. Charger toutes les sources de données
-    pdf_docs = load_pdfs(PDF_PATH)
-    corpus_docs = load_corpus(CORPUS_PATH)
-    text_docs = load_text_source(SOURCE_PATH)
-
-    # 2. Fusionner toutes les sources
-    all_docs = pdf_docs + corpus_docs + text_docs
-    logging.info(f"Total des documents fusionnés : {len(all_docs)}")
-
-    # 3. Construire ou charger la base vectorielle
-    vector_db = build_or_load_vector_db(all_docs)
-
-    # 4. Initialiser le modèle de langage
-    llm = ChatOllama(model=LLM_MODEL)
-
-    # 5. Créer le retriever et la chaîne
-    retriever = create_retriever(vector_db, llm)
-    chain = create_chain(retriever, llm)
-
-    # 6. Exemple de question
-    question = "Comment améliorer la culture du maïs pendant la saison des pluies ?"
-    response = chain.invoke(input=question)
-
-    print("\n🤖 Réponse d’AgriBot Burkina :")
-    print(response)
-
-
-if __name__ == "__main__":
-    main()

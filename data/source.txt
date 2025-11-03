@@ -1,2 +1,27 @@
-agriculture.gov.bf
-faso-coton.com
+source
+
+"faso-coton.com"
+"le faso.net"
+"fao.org"
+"agriculture.gov.bf"
+
+"https://www.aphlis.net/fr/data/tables/contextual-data/BF/millet/2021"
+
+
+
+"gradsuisse.wordpress.com"
+
+"shared-interest.com"
+ "sentinellebf.com"
+"BBC.COM"
+
+
+horizonird
+
+fratmat.info
+unido.org
+
+unctag.org
+
+revusciencetechniqueburkina.org
+
