@@ -22,7 +22,7 @@ app = FastAPI(title="AgriBot Burkina API", version="2.0")
 # Autoriser le frontend à appeler ton API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou ["http://127.0.0.1:3000"] si tu veux restreindre
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
