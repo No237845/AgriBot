@@ -6,29 +6,15 @@ import os
 import logging
 import pandas as pd
 from langchain_community.document_loaders import PyMuPDFLoader
-#from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-#from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-#from langchain.retrievers.multi_query import MultiQueryRetriever
-#from langchain_community.retrievers import MultiQueryRetriever
-#from langchain.retrievers.multi_query import MultiQueryRetrieverer
-#from langchain_experimental.retrievers import MultiQueryRetriever
 from langchain.retrievers.multi_query import MultiQueryRetriever
-
-
-
-
-
-
-
-
 import ollama
 
 # =====================================
