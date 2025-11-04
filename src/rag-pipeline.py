@@ -32,7 +32,7 @@ from langchain.retrievers.multi_query import MultiQueryRetriever
 import ollama
 
 # =====================================
-# CONFIGURATION
+# CONFIGURATION GENERALE
 # =====================================
 logging.basicConfig(level=logging.INFO)
 
@@ -42,7 +42,7 @@ VECTOR_DB_PATH = "./chrome_langchain_db"
 VECTOR_COLLECTION = "agri-rag"
 
 EMBEDDING_MODEL = "mxbai-embed-large"
-LLM_MODEL = "mistral"
+LLM_MODEL = "llama3.2:1b"
 
 # Initialiser le modèle d’embedding
 embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
@@ -160,22 +160,23 @@ def create_retriever(vector_db, llm):
 
 def create_chain(retriever, llm):
     """Crée la chaîne complète de génération RAG"""
-    template = """Tu es AgriBot Burkina 🇧🇫, un assistant IA agricole fiable et bienveillant.
-Tu aides les agriculteurs, étudiants et techniciens burkinabè à comprendre les bonnes pratiques agricoles
-en te basant sur des données locales et des documents techniques.
-
-Réponds uniquement avec les informations trouvées dans le contexte ci-dessous.
-Si tu n'as pas assez d’information, réponds :
+    template = """Tu es AgriBot Burkina 🇧🇫, assistant agricole.
+Tu dois répondre **SEULEMENT** à partir des extraits fournis dans "Contexte". **Ne pas inventer**.
+Si la réponse n'apparaît pas dans le contexte, répond exactement :
 "Je n'ai pas trouvé cette information dans mes documents agricoles."
 
+Format de la réponse demandée :
+1) Réponse claire et concise (FR)
+2) Sources utilisées (liste numérotée : Nom du document — champ 'source' ou 'title' dans les metadata)
+
 ====================
-Contexte :
+Contexte (extraits de documents pertinents) :
 {context}
 ====================
 
 Question : {question}
 
-Réponse claire et concise :
+Réponse :
 """
 
     prompt = ChatPromptTemplate.from_template(template)

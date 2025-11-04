@@ -9,7 +9,7 @@
 # =========================================================
 # Gère la clé API, les crédits et communique avec le serveur RAG
 # =========================================================
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, Header, HTTPException
 from pydantic import BaseModel
 from src.rag_pipeline import *
@@ -18,6 +18,15 @@ from src.rag_pipeline import *
 
 
 app = FastAPI(title="AgriBot Burkina API", version="2.0")
+
+# Autoriser le frontend à appeler ton API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ou ["http://127.0.0.1:3000"] si tu veux restreindre
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def startup_event():
@@ -33,7 +42,7 @@ def startup_event():
     vector_db = build_or_load_vector_db(all_docs, embeddings)
     llm = ChatOllama(
         model=LLM_MODEL,
-        temperature=0.7,
+        temperature=0,
         num_predict=512)
     retriever = create_retriever(vector_db, llm)
     chain = create_chain(retriever, llm)
@@ -47,6 +56,7 @@ class PromptRequest(BaseModel):
     prompt: str
 
 
+
 @app.post("/generate")
 def generate(request: PromptRequest):
     """Génère une réponse agricole à partir d'une question utilisateur"""
@@ -55,10 +65,12 @@ def generate(request: PromptRequest):
         raise HTTPException(status_code=500, detail="Pipeline RAG non initialisé.")
 
     try:
-        response = chain.invoke(request.prompt)
+        # Passer la question sous forme de dictionnaire avec la clé attendue
+        response = chain.invoke({"question": request.prompt})
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur de génération : {e}")
+
 
 
 @app.get("/")

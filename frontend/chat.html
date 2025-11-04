@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assistant IA Agricole – Chat</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- 💬 Zone de chat -->
+    <section class="chat-area">
+      <div id="chat-window">
+        <!-- Les messages apparaîtront ici -->
+      </div>
+      <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Écrivez quelque chose..." required />
+        <button type="submit" title="Envoyer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 24 24">
+            <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- Sidebar avec historique et documents -->
+    <aside class="sidebar">
+      <div class="history">
+        <h2>Historique</h2>
+        <ul id="history-list">
+          <!-- Historique des questions -->
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
